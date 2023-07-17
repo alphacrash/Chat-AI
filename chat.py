@@ -2,7 +2,9 @@
 import json
 import openai
 import requests
+import prompts
 
+# Values
 key_file = "values/key.json"
 urls_file = "values/urls.json"
 
@@ -40,14 +42,15 @@ class BookChat:
     """
 
     INTENT_DETECTION_SETUP_PROMPT = """Your task is to classify the student's intent from the below `Conversation` between an assistant and a student into following `Intent Categories`. Response should follow the `Output Format`.
-    
+
     Conversation:
     {conversation}
 
     Intent Categories:
     GREETING: student is greeting the chatbot.
     BOOK_ENQUIRY: student's query regarding the book present in library.
-    OUT_OF_CONTEXT: student's query which is irrelevant and cannot be classified in the above three intents.
+    CREATE_BOOK: student's request to create a new book in library.
+    OUT_OF_CONTEXT: student's query which is irrelevant and cannot be classified in the above intents.
 
     Output Format: <PREDICTED_INTENT>
     """
@@ -59,9 +62,13 @@ class BookChat:
 
     Entities:
     BOOK_NAME: This is the name of the book.
-    BOOK_LANGUAGE: This is language of the book.
+    BOOK_PRICE: This is the price of the book.
+    BOOK_AUTHOR: This is the author of the book.
+    BOOK_PUBLISHER: This is the publisher of the book.
+    BOOK_LANGUAGE: This is the language of the book.
+    BOOK_PAGES: This is the number of pages in the book.
 
-    Output Format: {{'BOOK_NAME': <Book name in strings>, 'BOOK_LANGUAGE': <Language in strings>}}
+    Output Format: {{'BOOK_NAME': <Book name in strings>, 'BOOK_PRICE': <Price in strings>, 'BOOK_AUTHOR': <Author name in strings>, 'BOOK_PUBLISHER': <Publisher name in strings>, 'BOOK_LANGUAGE': <Language in strings>, 'BOOK_PAGES': <Number of pages in strings>}}
     """
 
     def intent_detection(self, conversation):
@@ -73,7 +80,7 @@ class BookChat:
         messages=chat_ml,
         temperature=0)
         
-        return response['choices'][0]['message']['content'].strip(" \n'") # type: ignore
+        return response['choices'][0]['message']['content'].strip(" \n'")
     
 
     def enquiry_details(self, conversation):
@@ -85,7 +92,7 @@ class BookChat:
         messages=chat_ml,
         temperature=0)
         
-        return response['choices'][0]['message']['content'].strip(" \n") # type: ignore
+        return response['choices'][0]['message']['content'].strip(" \n")
 
     def conversation_chat(self):
         conversation = ""
@@ -103,7 +110,7 @@ class BookChat:
                 messages=chatml_messages
             )
 
-            agent_response = response['choices'][0]['message']['content'].strip(" \n") # type: ignore
+            agent_response = response['choices'][0]['message']['content'].strip(" \n")
 
             if "END_OF_CONVERSATION" in agent_response:
                 print("Assistant: Thank you for connecting with us. Have a nice day!")
@@ -132,7 +139,7 @@ class BookChat:
                 chatml_messages.append({"role": "user", "content": "Greet the student and ask how you can help them."})
             elif 'BOOK_ENQUIRY' in intent:
                 entities = self.enquiry_details(conversation)
-                entities = entities.split(",") # type: ignore
+                entities = entities.split(",")
                 book_name = entities[0].split(":")[-1].strip(" '}{")
                 language = entities[1].split(":")[-1].strip(" '}{")
 
@@ -150,6 +157,46 @@ class BookChat:
 
                     if response.status_code == 200:
                         chatml_messages.append({"role": "user", "content": "Provide the details to the student as depicted in the below json in natural language in a single line, don't put it in the json format to the student:\n{}".format(str(resp_json))})
+                        end_flag = True
+                    else:
+                        chatml_messages.append({"role": "user", "content": "Some invalid data is provided by the student. Provide the details to the student as depicted in the below json in natural language, don't put it in the json format to the student:\n{}".format(str(resp_json))})
+                        end_flag = True
+            elif 'CREATE_BOOK' in intent:
+                entities = self.enquiry_details(conversation)
+                entities = entities.split(",")
+                book_name = entities[0].split(":")[-1].strip(" '}{")
+                book_price = entities[1].split(":")[-1].strip(" '}{")
+                book_author = entities[2].split(":")[-1].strip(" '}{")
+                book_publisher = entities[3].split(":")[-1].strip(" '}{")
+                book_language = entities[4].split(":")[-1].strip(" '}{")
+                book_pages = entities[5].split(":")[-1].strip(" '}{")
+
+                if book_name.upper() == "NULL":
+                    chatml_messages.append({"role": "user", "content": "Ask the student for name of book"})
+                elif book_price.upper() == "NULL":
+                    chatml_messages.append({"role": "user", "content": "Ask the student for price of book"})
+                elif book_author.upper() == "NULL":
+                    chatml_messages.append({"role": "user", "content": "Ask the student for author of book"})
+                elif book_publisher.upper() == "NULL":
+                    chatml_messages.append({"role": "user", "content": "Ask the student for publisher of book"})
+                elif book_language.upper() == "NULL":
+                    chatml_messages.append({"role": "user", "content": "Ask the student for language of book"})
+                elif book_pages.upper() == "NULL":
+                    chatml_messages.append({"role": "user", "content": "Ask the student for number of pages in book"})
+                else:
+                    data = {
+                        "name": book_name,
+                        "price": book_price,
+                        "author": book_author,
+                        "publisher": book_publisher,
+                        "language": book_language,
+                        "pages": book_pages
+                    }
+                    response = requests.post(post_by_id_url, json=data)
+                    resp_json = response.json()
+
+                    if response.status_code == 200:
+                        chatml_messages.append({"role": "user", "content": "Inform that book is created and provide the details to the student as depicted in the below json in natural language in a single line, don't put it in the json format to the student:\n{}".format(str(resp_json))})
                         end_flag = True
                     else:
                         chatml_messages.append({"role": "user", "content": "Some invalid data is provided by the student. Provide the details to the student as depicted in the below json in natural language, don't put it in the json format to the student:\n{}".format(str(resp_json))})
