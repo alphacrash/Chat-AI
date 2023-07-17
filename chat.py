@@ -49,10 +49,8 @@ class BookChat:
     Intent Categories:
     GREETING: student is greeting the chatbot.
     CREATE_BOOK: student's request to create a new book in library.
-    GET_ALL_BOOKS: student's request to get all the books present in library.
     DELETE_BOOK: student's request to delete a book from library.
-    FETCH_A_BOOK: student's request to fetch a book from library.
-    EXPERIMENTAL: student's request to perform some experimental query on the data present in library.
+    EXPERIMENTAL: any query related to books or library
     OUT_OF_CONTEXT: student's query which is irrelevant and cannot be classified in the above intents.
 
     Output Format: <PREDICTED_INTENT>
@@ -136,6 +134,7 @@ class BookChat:
 
              # Classify the intent
             intent = self.intent_detection(conversation)
+            print("Intent: {}".format(intent))
 
             if 'OUT_OF_CONTEXT' in intent:
                 chatml_messages.append({"role": "user", "content": "Politely say to student to stay on the topic not to diverge."})
@@ -191,7 +190,7 @@ class BookChat:
                     else:
                         chatml_messages.append({"role": "user", "content": "Some invalid data is provided by the student. Provide the details to the student as depicted in the below json in natural language, don't put it in the json format to the student:\n{}".format(str(resp_json))})
                         end_flag = True
-            elif 'FETCH_A_BOOK' in intent:
+            elif 'GET_A_BOOK' in intent:
                 entities = self.enquiry_details(conversation)
                 entities = entities.split(",")
                 book_id = entities[0].split(":")[-1].strip(" '}{")
@@ -211,12 +210,12 @@ class BookChat:
             elif 'CREATE_BOOK' in intent:
                 entities = self.enquiry_details(conversation)
                 entities = entities.split(",")
-                book_name = entities[0].split(":")[-1].strip(" '}{")
-                book_price = entities[1].split(":")[-1].strip(" '}{")
-                book_author = entities[2].split(":")[-1].strip(" '}{")
-                book_publisher = entities[3].split(":")[-1].strip(" '}{")
-                book_language = entities[4].split(":")[-1].strip(" '}{")
-                book_pages = entities[5].split(":")[-1].strip(" '}{")
+                book_name = entities[1].split(":")[-1].strip(" '}{")
+                book_price = entities[2].split(":")[-1].strip(" '}{")
+                book_author = entities[3].split(":")[-1].strip(" '}{")
+                book_publisher = entities[4].split(":")[-1].strip(" '}{")
+                book_language = entities[5].split(":")[-1].strip(" '}{")
+                book_pages = entities[6].split(":")[-1].strip(" '}{")
 
                 if book_name.upper() == "NULL":
                     chatml_messages.append({"role": "user", "content": "Ask the student for name of book"})
@@ -250,11 +249,11 @@ class BookChat:
                         end_flag = True
             elif 'EXPERIMENTAL' in intent:
                 response = requests.get(get_all_url)
+                print("Fetched Data")
                 resp_json = response.json()
 
                 if response.status_code == 200:
                     chatml_messages.append({"role": "user", "content": "Using data {}, try to give only the details asked by student".format(str(resp_json))})
-                    end_flag = True
                 else:
                     chatml_messages.append({"role": "user", "content": "Some invalid data is provided by the student. Provide the details to the student as depicted in the below json in natural language, don't put it in the json format to the student:\n{}".format(str(resp_json))})
                     end_flag = True

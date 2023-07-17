@@ -2,7 +2,7 @@
 
 ## Intents
 
-- [x] Create a Book
-- [x] Fetch a Book
-- [x] Delete a Book
+- [x] Create a Book by ID
+- [x] Fetch a Book by ID
+- [x] Delete a Book by ID
 - [x] Get all Books
