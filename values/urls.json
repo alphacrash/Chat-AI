@@ -1,8 +1,8 @@
 {
-    "getById": "http://localhost:8080/api/books",
-    "putById": "http://localhost:8080/api/books",
-    "deleteById": "http://localhost:8080/api/books",
-    "postById": "http://localhost:8080/api/books",
-    "getAll": "http://localhost:8080/api/books",
+    "getById": "http://localhost:8080/api/books/",
+    "putById": "http://localhost:8080/api/books/",
+    "deleteById": "http://localhost:8080/api/books/",
+    "postById": "http://localhost:8080/api/books/",
+    "getAll": "http://localhost:8080/api/books/",
     "search": "http://localhost:8080/api/books/search"
 }

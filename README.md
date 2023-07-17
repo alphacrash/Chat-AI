@@ -3,6 +3,6 @@
 ## Intents
 
 - [x] Create a Book
-- [ ] Fetch a Book
-- [ ] Delete a Book
-- [ ] Get all Books
+- [x] Fetch a Book
+- [x] Delete a Book
+- [x] Get all Books
