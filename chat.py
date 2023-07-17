@@ -1,13 +1,26 @@
 # RUN: python chat.py
-
+import json
 import openai
 import requests
 
+key_file = "values/key.json"
+urls_file = "values/urls.json"
+
 # Key
-openai.api_key = "API_KEY"
+with open(key_file, "r") as file:
+    key_data = json.load(file)
+with open(urls_file, "r") as file:
+    urls_data = json.load(file)
+
+openai.api_key = key_data["key"]
 
 # API Endpoints
-getbook_url = "http://localhost:8080/api/books/search"
+get_by_id_url = urls_data["getById"]
+put_by_id_url = urls_data["putById"]
+delete_by_id_url = urls_data["deleteById"]
+post_by_id_url = urls_data["postById"]
+get_all_url = urls_data["getAll"]
+search_url = urls_data["search"]
 
 # Main
 class BookChat:
@@ -132,7 +145,7 @@ class BookChat:
                                 "name": book_name,
                                 "language": language
                            }
-                    response = requests.post(getbook_url, json=data)
+                    response = requests.post(search_url, json=data)
                     resp_json = response.json()
 
                     if response.status_code == 200:

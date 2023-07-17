@@ -161,3 +161,6 @@ cython_debug/
 
 # VS Code
 .vscode/
+
+# Custom
+values/key.json
