@@ -1,8 +1,12 @@
 {
-    "getById": "http://localhost:8080/api/books/",
-    "putById": "http://localhost:8080/api/books/",
-    "deleteById": "http://localhost:8080/api/books/",
-    "postById": "http://localhost:8080/api/books/",
-    "getAll": "http://localhost:8080/api/books/",
-    "search": "http://localhost:8080/api/books/search"
+  "getById": "http://localhost:8080/api/books/",
+  "putById": "http://localhost:8080/api/books/",
+  "deleteById": "http://localhost:8080/api/books/",
+  "postById": "http://localhost:8080/api/books/",
+  "getAll": "http://localhost:8080/api/books/",
+  "search": "http://localhost:8080/api/books/search",
+  "getAddresses": "http://localhost:8080/api/v1/consumers/consumerId/addresses",
+  "createAddress": "http://localhost:8080/api/v1/consumers/consumerId/addresses",
+  "updateAddress": "http://localhost:8080/api/v1/consumers/consumerId/addresses",
+  "deleteAddress": "http://localhost:8080/api/v1/consumers/consumerId/addresses/addressType"
 }
